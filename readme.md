@@ -1,124 +1,151 @@
-```markdown
-# EmotionBeat: Multi-Emotion Regression on Song Lyrics
 
-**Repository:** https://github.com/shaiDahari/EmotionBeat
+# 🎧 EmotionBeat: Multi-Emotion Regression on Song Lyrics
+
+Welcome to **EmotionBeat**, a deep learning NLP project that predicts **multi-dimensional emotional intensities** from song lyrics. Instead of simple tags, our system produces **six continuous emotion scores**—enabling mood-based music exploration like never before.
+
+[🔗 Project Report (PDF)](https://github.com/shaiDahari/EmotionBeat/blob/main/Docs/NLP%20FINAL%20PTT.pdf) • [🧠 View Notebook](link-to-notebook) • [📊 See Results](#results-summary)
 
 ---
 
-## 📖 Project Overview
+## 🔍 Problem Statement
 
-EmotionBeat implements an end-to-end pipeline to predict six continuous emotion intensities—Joy, Sadness, Anger, Fear, Surprise and Tenderness—from a single concatenated text input:
+Music isn’t just about genre—**it’s about how it makes us feel**. Unfortunately, current music metadata lacks **fine-grained emotional tagging**, limiting mood-based discovery.
 
+**Goal:**  
+Given a song's title, genre, artist, and lyrics, predict a vector of **six continuous emotion scores** (range `[0.0 – 2.0]`) for:
+> Joy ∣ Sadness ∣ Anger ∣ Fear ∣ Surprise ∣ Tenderness
+
+---
+
+## 📦 Dataset
+
+- 📂 **Source:** [Kaggle: Spotify Most Popular Songs](https://www.kaggle.com)
+- 🎼 **Instances:** 497 songs (after filtering)
+- 🧪 **Split:** Train/Val/Test → 70% / 15% / 15%
+- 💾 **Fields:**
+  - Title, Genre, Artist, Cleaned Lyrics
+  - Emotion Scores (MOS aggregated from 6 annotators)
+
+### 🧠 Labeling via Mean Opinion Scores (MOS)
+
+Each song was rated by multiple annotators on a scale from **0.0 (none)** to **2.0 (high intensity)** per emotion. Final labels are the average across raters.
+
+---
+
+## 🧪 Exploratory Data Analysis (EDA)
+
+- 🎯 **Dominant Emotions:** Joy, Tenderness
+- 😨 **Least Represented:** Fear
+- 🔗 **Interesting Correlations:**
+  - Joy ↔ Sadness: -0.30
+  - Anger ↔ Fear: +0.25
+- 🎶 **Genre Trends:**
+  - EDM → high Joy & Surprise
+  - Rock → elevated Anger & Fear
+
+---
+
+## 🧰 Models & Pipeline
+
+### 1. **Baseline**
+- Predicts training-set mean vector for all songs.
+- MSE ≈ 0.1511
+
+### 2. **Transformer Fine-Tuning**
+#### 🔧 `BERTForMultiRegression`
+- Model: `bert-base-uncased`
+- Custom regression head: 256-dim layer + ReLU + Dropout → 6 outputs
+- Best Params: `lr=3e-5`, `batch=4`, `epochs=5`, `weight_decay=0.05`
+
+#### 🔧 `RoBERTaForMultiRegression`
+- Model: `roberta-base`
+- Same architecture as above
+- Best Params: `lr=1e-5`, `batch=8`, `epochs=8`, `weight_decay=0.01`
+
+### 3. **Zero-Shot LLM**
+- Model: `Azure Grok_3`
+- Prompt-based inference only
+- No training involved
+
+---
+
+## 📈 Training Configuration
+
+- Framework: HuggingFace Transformers
+- Optimizer: AdamW
+- Loss: MSELoss
+- Hardware: Google Colab Pro, GPU L4
+- Search Space: 144 combinations (LR, epochs, batch size, weight decay)
+
+---
+
+## 📊 Results Summary
+
+| Model       | MSE ↓     | MAE ↓     | Notes                            |
+|-------------|-----------|-----------|----------------------------------|
+| **BERT**    | **0.1507**| 0.3331    | Best overall                     |
+| RoBERTa     | 0.1511    | **0.3334**| Best on Surprise & Tenderness    |
+| Baseline    | 0.1511    | 0.3335    | Mean predictor                   |
+| Zero-Shot   | 0.3872    | 0.5096    | Struggles with subtle lyrics     |
+
+### 🎯 Per-Emotion Highlights:
+- **BERT**: Strongest on Anger & Fear
+- **RoBERTa**: Best at Surprise & Tenderness
+- **Zero-Shot**: Underperforms on metaphorical text
+
+---
+
+## 🧱 Project Structure
+
+```bash
+.
+├── Data Set
+│   └── 500_song_tagging.xlsx
+├── Docs
+│   ├── EmotionBeat.pdf
+│   └── EmotionBeat.pptx
+├── Notebook
+│   └── SER_Complete_Pipeline.ipynb
+├── OutPuts
+│   ├── baseline_preds.csv
+│   ├── baseline_truth.csv
+│   ├── bert_predictions.csv
+│   ├── bert_truth.csv
+│   ├── roberta_predictions.csv
+│   ├── roberta_truth.csv
+│   ├── zero_shot_predictions.csv
+│   └── zero_shot_truth.csv
+├── Results
+│   └── table_1.png       # Overall MSE/MAE
+│   └── table_2.png       # Per-emotion MSE/MAE
+└── README.md
 ```
 
-Title: … | Genre: … | Artist: … | Lyrics: …
+---
 
-````
+## 🛣️ Future Work
 
-We compare four approaches:
-- **Baseline** (mean predictor)
-- **BERTForMultiRegression** (fine-tuned `bert-base-uncased`)
-- **RoBERTaForMultiRegression** (fine-tuned `roberta-base`)
-- **Zero-Shot LLM** (Azure Grok_3 API)
-
-Key features:
-- Data cleaning, formatting and tokenization
-- Baseline, supervised fine-tuning and zero-shot inference
-- Hyperparameter grid-search with cross-validation
-- Evaluation on held-out test set (MSE & MAE)
-- All code contained in one reusable notebook
+- 📈 **Scale Data**: Expand to 5K–10K labeled tracks
+- 🧪 **Better Splits**: Use stratified K-Fold CV
+- 🎛️ **Hyperparams**: Try dropout, GELU, larger hidden layers
+- 🔍 **Interpretability**: Visualize attention weights on lyrics
 
 ---
 
-## 🚀 Getting Started
+## 📚 Citation
 
-1. **Clone the repo**  
-   ```bash
-   git clone https://github.com/shaiDahari/EmotionBeat.git
-   cd EmotionBeat
-````
+If you use this code or data in your research, please cite:
 
-2. **Install dependencies**
-
-   ```bash
-   pip install torch transformers pandas numpy scikit-learn openpyxl
-   ```
-
-3. **Run the notebook**
-
-   * Open `SER_Complete_Pipeline.ipynb` in Jupyter Notebook or Google Colab
-   * Execute all cells to reproduce preprocessing, model training (baseline, BERT, RoBERTa), zero-shot inference and evaluation
-
-4. **Inspect outputs**
-
-   * Prediction CSVs (`baseline_preds.csv`, `bert_predictions.csv`, etc.)
-   * Summary tables: `table1_df.csv` (overall MSE/MAE) & `table2_df.csv` (per-emotion MSE/MAE)
-   * Present slides in `NLP_FINAL_PTT.pptx`
+> EmotionBeat: Multi-Emotion Regression on Song Lyrics  
+> [https://github.com/shaiDahari/EmotionBeat](https://github.com/shaiDahari/EmotionBeat)
 
 ---
 
-## 📂 Repository Structure
+## 🤝 Contributors
 
-```
-EmotionBeat/
-├── 500_song_tagging.xlsx            # Raw data: metadata, cleaned lyrics, MOS labels (0–2)
-├── SER_Complete_Pipeline.ipynb      # Full pipeline: preprocessing → modeling → evaluation
-├── NLP_FINAL_PTT.pptx               # Final presentation deck
-├── Final Nlp Presentation.pdf         # Assignment guidelines (slides 34–end)
-├── baseline_preds.csv               # Baseline predictions
-├── baseline_truth.csv               # Baseline ground truth
-├── bert_predictions.csv             # BERT predictions
-├── bert_truth.csv                   # BERT ground truth
-├── roberta_predictions.csv          # RoBERTa predictions
-├── roberta_truth.csv                # RoBERTa ground truth
-├── zero_shot_predictions.csv        # Zero-shot predictions
-├── zero_shot_truth.csv              # Zero-shot ground truth
-├── table1_df.csv                    # Overall MSE/MAE summary
-├── table2_df.csv                    # Per-emotion MSE/MAE breakdown
-└── README.md                        # This file
-```
+- Shai Dahari  
+- Adane Abaye
+- Mazal Lemlem
+- Naor Matsliah
 
 ---
-
-## 🧩 Methodology
-
-1. **Data Preparation**
-
-   * Clean and merge metadata + lyrics into one input string
-   * Split into train/val/test (70/15/15, `random_state=42`)
-   * Tokenize with the appropriate transformer tokenizer
-
-2. **Baseline**
-
-   * Compute and predict the training-set mean emotion vector
-
-3. **Transformer Fine-Tuning**
-
-   * Fine-tune BERT and RoBERTa using AdamW + MSE loss
-   * Grid-search hyperparameters (learning rate, batch size, epochs, weight decay) with cross-validation
-   * Early stopping on validation MSE
-
-4. **Zero-Shot Inference**
-
-   * Send a structured prompt to Azure Grok\_3 API
-   * Parse the returned JSON of six emotion scores
-
-5. **Evaluation**
-
-   * Compute overall & per-emotion MSE/MAE on the test set
-   * Compare all four approaches
-
----
-
-## 📊 Results
-
-* **Overall metrics** (`table1_df.csv`): MSE & MAE for each model
-* **Per-emotion metrics** (`table2_df.csv`): breakdown across Joy, Sadness, Anger, Fear, Surprise, Tenderness
-
----
-
-## 🤝 Contributing
-
-Contributions welcome! Please open an issue or submit a pull request for bug fixes or enhancements.
-
-
