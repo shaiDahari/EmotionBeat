@@ -3,7 +3,7 @@
 
 Welcome to **EmotionBeat**, a deep learning NLP project that predicts **multi-dimensional emotional intensities** from song lyrics. Instead of simple tags, our system produces **six continuous emotion scores**—enabling mood-based music exploration like never before.
 
-[🔗 Project Report (PDF)](https://github.com/shaiDahari/EmotionBeat/blob/main/Docs/NLP%20FINAL%20PTT.pdf) • [🧠 View Notebook](link-to-notebook) • [📊 See Results](#results-summary)
+[🔗 Project Report (PDF)](https://github.com/shaiDahari/EmotionBeat/blob/main/Docs/Emotion%20Beat.pdf) • [🧠 View Notebook](https://github.com/shaiDahari/EmotionBeat/blob/main/Notebook/SER_Complete_Pipeline.ipynb) • [📊 See Results Summery](https://github.com/shaiDahari/EmotionBeat#-results-summary)
 
 ---
 
